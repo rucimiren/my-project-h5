@@ -25,7 +25,7 @@ export default {
         },
         {
           src: 'http://yaru.vip:8080/images/icon/git.png',
-          text: 'git',
+          // text: 'git',
         },
         {
           src: 'http://yaru.vip:8080/images/icon/ts.png',
@@ -53,4 +53,10 @@ export default {
   methods: {},
 }
 </script>
-<style></style>
+<style lang="less" scoped>
+.demo-drag {
+  position: relative;
+  margin-top: 200px;
+  padding: 15px;
+}
+</style>
