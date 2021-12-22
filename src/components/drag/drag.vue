@@ -8,11 +8,14 @@
       @touchmove="touchmoveHandle(i, $event)"
       @touchend="touchendHandle"
       @touchstart="touchstartHandle(i, $event)"
+      @mousedown="touchstartHandle(i, $event)"
+      @mouseup="touchendHandle"
+      @mousemove="touchmoveHandle(i, $event)"
       ref="dragContentItem"
     >
       <div class="drag__content-item-container">
-        <img :src="v.src" alt="" />
-        <span v-if="v.text">{{ v.text }}</span>
+        <img :src="v.src" alt="" :style="iconStyle" />
+        <span v-if="v.text" :style="iconTextStyle">{{ v.text }}</span>
       </div>
     </div>
     <!-- 动画的效果 -->
@@ -25,8 +28,8 @@
         class="drag__content-animation-container"
         ref="dragContentAnimationContainer"
       >
-        <img src="" alt="" />
-        <span></span>
+        <img src="" alt="" :style="iconStyle" />
+        <span :style="iconTextStyle"></span>
       </div>
     </div>
   </div>
@@ -63,8 +66,11 @@ export default {
     // 列
     col: {
       type: Number,
-      default: 3,
+      default: 4,
     },
+    iconStyle: Object,
+    iconTextStyle: Object,
+    itemContentStyle: Object,
   },
   data() {
     return {
@@ -78,6 +84,7 @@ export default {
         arrI: [],
         opacityBoo: true,
       },
+      selectIndex: -1, // 要拖动图标的索引
     }
   },
   computed: {
@@ -87,6 +94,7 @@ export default {
       return {
         width: `${100 / this.col}%`,
         paddingTop: `${100 / this.col}%`,
+        ...this.itemContentStyle,
       }
     },
     // 动画元素style
@@ -94,6 +102,7 @@ export default {
       return {
         width: `${100 / this.col}%`,
         paddingTop: `${100 / this.col}%`,
+        ...this.itemContentStyle,
       }
     },
     // row行数根据数据的数量和col列数计算得出
@@ -112,6 +121,7 @@ export default {
       clearTimeout(this.tuodong.timer)
       // 定时器的作用是为了达到长按的效果
       this.tuodong.timer = setTimeout(() => {
+        this.selectIndex = i
         // 拷贝一份数据 制作动画时用
         this.movesList2 = JSON.parse(JSON.stringify(this.movesList))
         // 设为true 代表已经达到的长按的效果，可以执行touchmove里面的代码了
@@ -125,8 +135,8 @@ export default {
       // 取消浏览器默认事件 （有时在屏幕上移动会触发滚动条）
       e.preventDefault()
       // 判断是否符合长按标准，达标后可执行拖动
-      if (this.tuodong.startBoo) {
-        this.handle(i, e)
+      if (this.tuodong.startBoo && this.selectIndex > -1) {
+        this.handle(this.selectIndex, e)
       }
     },
     // touchend
@@ -148,12 +158,13 @@ export default {
         dragContentAnimationEle.style.transition = ''
         // 执行完if语句代码 将开关置为false 只有再次满足长按事件才会触发这里的代码
         this.tuodong.boo = false
-        // !!!打印下拖动后的数据 最后要把这个数据返出去
-        console.log(this.movesList)
+        // !!! 最后要把拖动后的数据返出去
+        this.$emit('moveData', this.movesList)
       }
       clearTimeout(this.tuodong.timer)
       // 松开手指后，将长按事件的开关设为false
       this.tuodong.startBoo = false
+      this.selectIndex = -1
       this.tuodong.opacityBoo = true
     },
     handle(i, e) {
@@ -174,9 +185,13 @@ export default {
       // 列数
       let col = this.col
       // 手指在盒子中x轴的位置
-      let touchX = e.touches[0].pageX - parentX
+      let touchX = e.touches?.[0]
+        ? e.touches[0].pageX - parentX
+        : e.pageX - parentX
       // 手指在盒子中Y轴的位置
-      let touchY = e.touches[0].pageY - parentY
+      let touchY = e.touches?.[0]
+        ? e.touches[0].pageY - parentY
+        : e.pageY - parentY
       // 动画及其样式开始
       let dragContentAnimationEle = this.$refs.dragContentAnimation
       let cirX = touchX - dragContentAnimationEle.offsetWidth / 2
@@ -237,7 +252,6 @@ export default {
             this.movesList.splice(hh, 1)
           }
           this.movesList.splice(this.tuodong.index, 0, ...this.tuodong.arrI)
-          dragContentItemEle.style.opacity = 1
           this.tuodong.opacityBoo = false
           this.$refs.dragContentItem.forEach((v, i) => {
             if (i === indexEnd) {
