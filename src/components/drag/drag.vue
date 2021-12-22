@@ -48,7 +48,7 @@ function offset(ele) {
       } else {
         left += e.offsetLeft
         top += e.offsetTop
-        fn(ele.offsetParent)
+        fn(e.offsetParent)
       }
     }
   }
