@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import drag from '@/components/drag/drag.vue'
+import drag from '@/components/drag'
 export default {
   name: 'demo-drag',
   components: {

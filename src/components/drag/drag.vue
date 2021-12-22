@@ -168,32 +168,24 @@ export default {
       this.tuodong.opacityBoo = true
     },
     handle(i, e) {
-      // 父盒子
-      let dragContentEle = this.$refs.dragContent
-      // 子盒子(需要移动的盒子)
-      let dragContentItemEle = this.$refs.dragContentItem[i]
-      // 子盒子自身的高度
-      let childH = dragContentItemEle.offsetHeight
-      // 子盒子自身的宽度
-      let childW = dragContentItemEle.offsetWidth
-      // 父盒子距离顶部的距离
-      let parentY = offset(dragContentEle).top
-      // 父盒子距离顶部的距离
-      let parentX = offset(dragContentEle).left
       // 行数
-      let row = this.row
+      const row = this.row
       // 列数
-      let col = this.col
-      // 手指在盒子中x轴的位置
-      let touchX = e.touches?.[0]
-        ? e.touches[0].pageX - parentX
-        : e.pageX - parentX
-      // 手指在盒子中Y轴的位置
-      let touchY = e.touches?.[0]
-        ? e.touches[0].pageY - parentY
-        : e.pageY - parentY
+      const col = this.col
+      // 子盒子自身的高度
+      const childH = this.$refs.dragContentItem[i].offsetHeight
+      // 子盒子自身的宽度
+      const childW = this.$refs.dragContentItem[i].offsetWidth
+      // 手指在盒子中x轴的位置 (兼容了H5和PC)
+      const touchX = e.touches?.[0]
+        ? e.touches[0].pageX - offset(this.$refs.dragContent).left
+        : e.pageX - offset(this.$refs.dragContent).left
+      // 手指在盒子中Y轴的位置 (兼容了H5和PC)
+      const touchY = e.touches?.[0]
+        ? e.touches[0].pageY - offset(this.$refs.dragContent).top
+        : e.pageY - offset(this.$refs.dragContent).top
       // 动画及其样式开始
-      let dragContentAnimationEle = this.$refs.dragContentAnimation
+      const dragContentAnimationEle = this.$refs.dragContentAnimation
       let cirX = touchX - dragContentAnimationEle.offsetWidth / 2
       let cirY = touchY - dragContentAnimationEle.offsetHeight / 2
       if (cirX >= childW * (col - 1)) {
@@ -211,7 +203,7 @@ export default {
       dragContentAnimationEle.style.top = cirY + 'px'
       dragContentAnimationEle.style.transition = 'all 0.04s'
       if (this.tuodong.opacityBoo) {
-        dragContentItemEle.style.opacity = 0
+        this.$refs.dragContentItem[i].style.opacity = 0
       }
       // 动画里的子元素
       let dragContentAnimationContainerEle =
